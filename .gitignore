@@ -40,4 +40,4 @@ docker-compose.override.yml
 .idea/
 
 # Local data (optional, remove if you want to commit your tickers)
-# tickers.json
+tickers.json
