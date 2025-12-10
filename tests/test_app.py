@@ -195,5 +195,57 @@ class TestApp(unittest.TestCase):
         self.assertIsNotNone(result['Estado'])
         self.assertIsNotNone(result['Tendencia'])
         
+
+
+    def test_render_functions(self):
+        # Create dummy dataframes
+        df_stocks = pd.DataFrame([{
+            'Ticker': 'AAPL', 'Precio Actual': 150.0, 'Valor Justo': 160.0,
+            'Potencial': 0.1, 'Estado': 'Infravalorada', 'Market Cap': 1e12,
+            'Div Yield': 0.01, 'P/E': 25.0, 'P/B': 10.0, 'P/S (TTM)': 5.0,
+            'EV': 1.1e12, 'Deuda/Eq': 0.5, 'Modelos': 'Details'
+        }])
+        
+        df_etfs = pd.DataFrame([{
+            'Ticker': 'VOO', 'Nombre': 'Vanguard S&P 500', 'Precio': 400.0,
+            'Potencial': 0.05, 'Estado': 'Cerca de Máximos', 'Yield': 0.015,
+            'Expense Ratio': 0.0003, 'Retorno YTD': 0.1, 
+            'Categoría': 'Large Blend', 'Activos': 1e9
+        }])
+        
+        df_crypto = pd.DataFrame([{
+            'Ticker': 'BTC-USD', 'Nombre': 'Bitcoin', 'Precio': 50000.0,
+            'Potencial': 0.2, 'Estado': 'Oportunidad de Rebote', 'Tendencia': 'Alcista',
+            'Market Cap': 1e12, 'Volumen 24h': 1e9, 
+            'MA 50d': 45000.0, 'MA 200d': 40000.0
+        }])
+
+        # Call render functions (should not raise error)
+        try:
+            app.render_dataframe(df_stocks)
+            app.render_etf_dataframe(df_etfs)
+            app.render_crypto_dataframe(df_crypto)
+        except Exception as e:
+            self.fail(f"Render functions raised exception: {e}")
+
+    def test_main_execution(self):
+        # Setup session state for main
+        mock_st.session_state.tickers = {
+            "stocks": ["AAPL"], 
+            "etfs": [], 
+            "crypto": []
+        }
+        
+        # Mock specific interactions to control flow
+        # Tab selection: default is first tab (stocks)
+        # Search box return empty to skip add logic
+        mock_st.text_input.return_value = "" 
+        
+        # Run main
+        try:
+            app.main()
+        except Exception as e:
+             self.fail(f"Main execution raised exception: {e}")
+
 if __name__ == '__main__':
     unittest.main()
