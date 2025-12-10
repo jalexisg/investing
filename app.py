@@ -324,7 +324,19 @@ def get_crypto_data(ticker_symbol):
         volume_24h = info.get('volume24Hr') or info.get('volume')
         circulating_supply = info.get('circulatingSupply')
         
-        # Status logic
+        # Trend Logic (Calculated independently)
+        ma50 = info.get('fiftyDayAverage')
+        ma200 = info.get('twoHundredDayAverage')
+        trend = "Neutro"
+        if ma50 and ma200:
+            if current_price > ma50 and current_price > ma200:
+                trend = "Alcista (Bullish)"
+            elif current_price < ma50 and current_price < ma200:
+                trend = "Bajista (Bearish)"
+        else:
+             trend = "N/A"
+
+        # Status logic (Opportunity from 52W High)
         high_52w = info.get('fiftyTwoWeekHigh')
         potential = None
         status = "Neutro" # Default fallback
@@ -340,17 +352,6 @@ def get_crypto_data(ticker_symbol):
                 status = "Cerca de Máximos"
             else:
                 status = "En Máximos"
-        else:
-            # Fallback to MA logic if 52W high is missing
-            ma50 = info.get('fiftyDayAverage')
-            ma200 = info.get('twoHundredDayAverage')
-            if ma50 and ma200:
-                if current_price > ma50 and current_price > ma200:
-                    status = "Alcista (Bullish)"
-                elif current_price < ma50 and current_price < ma200:
-                    status = "Bajista (Bearish)"
-                else:
-                    status = "Neutro"
 
         return {
             "Ticker": ticker_symbol,
@@ -358,6 +359,7 @@ def get_crypto_data(ticker_symbol):
             "Precio": current_price,
             "Potencial": potential,
             "Estado": status,
+            "Tendencia": trend,
             "Market Cap": info.get('marketCap'),
             "Volumen 24h": info.get('volume24Hr'),
             "Circulating Supply": info.get('circulatingSupply'),
@@ -414,7 +416,7 @@ def render_etf_dataframe(dataframe):
             "Nombre": st.column_config.TextColumn("Nombre", width="large"),
             "Precio": st.column_config.NumberColumn("Precio", format="$%.2f"),
             "Potencial": st.column_config.ProgressColumn(
-                "Potencial Recupas.",
+                "Potencial 52W",
                 help="Potencial de recuperación hasta el máximo de 52 semanas",
                 format="%.2f%%",
                 min_value=-0.5,
@@ -443,8 +445,16 @@ def render_crypto_dataframe(dataframe):
              color = 'background-color: #1f77b4; color: white'
         return color
 
+    def highlight_trend(val):
+        color = ''
+        if 'Alcista' in str(val):
+            color = 'color: #2ca02c; font-weight: bold'
+        elif 'Bajista' in str(val):
+            color = 'color: #d62728; font-weight: bold'
+        return color
+
     st.dataframe(
-        dataframe.style.map(highlight_crypto_status, subset=['Estado']),
+        dataframe.style.map(highlight_crypto_status, subset=['Estado']).map(highlight_trend, subset=['Tendencia']),
         column_config={
             "Ticker": st.column_config.TextColumn("Símbolo", width="small"),
             "Nombre": st.column_config.TextColumn("Nombre", width="medium"),
@@ -456,7 +466,8 @@ def render_crypto_dataframe(dataframe):
                 min_value=-0.5,
                 max_value=1.5,
             ),
-            "Estado": st.column_config.TextColumn("Estado"),
+            "Estado": st.column_config.TextColumn("Estado (Oportunidad)"),
+            "Tendencia": st.column_config.TextColumn("Tendencia (MA)"),
             "Market Cap": st.column_config.NumberColumn("Market Cap", format="$%.2e"),
             "Volumen 24h": st.column_config.NumberColumn("Volumen 24h", format="$%.2e"),
             "MA 50d": st.column_config.NumberColumn("MA 50d", format="$%.2f"),
@@ -667,6 +678,15 @@ def main():
             render_etf_dataframe(pd.DataFrame(etf_data))
         else:
             st.info("Añade ETFs para ver información.")
+            
+        with st.expander("ℹ️ Ayuda: ¿Qué significan estos datos?"):
+            st.markdown("""
+            **Potencial 52w**: Porcentaje que le falta subir para recuperar su Máximo Anual (52-Week High).
+            * Cálculo: `(Máximo 52 Semanas - Precio Actual) / Precio Actual`
+            * **Oportunidad de Rebote**: El activo ha caído >20% desde sus máximos.
+            * **Recuperando**: Ha caído entre 5% y 20%.
+            * **Cerca de Máximos**: Está a menos de un 5% de su máximo.
+            """)
 
     # --- Tab 3: Criptomonedas ---
     with tab_crypto:
@@ -748,6 +768,13 @@ def main():
             render_crypto_dataframe(pd.DataFrame(crypto_data))
         else:
             st.info("Añade Criptomonedas (ej: BTC-USD) para comenzar.")
+            
+        with st.expander("ℹ️ Ayuda: ¿Qué significan estos datos?"):
+            st.markdown("""
+            **Potencial 52w**: Distancia hasta el máximo precio del último año.
+            * **Oportunidad de Rebote**: Caída >20% desde máximos. Puede indicar un buen punto de entrada si la tendencia de fondo es alcista.
+            * **Alcista / En Máximos**: El activo está rompiendo récords o muy fuerte.
+            """)
 
     # --- Tab 4: Oportunidades ---
     with tab_opportunities:

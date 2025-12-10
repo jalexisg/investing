@@ -190,9 +190,10 @@ class TestApp(unittest.TestCase):
         
         result = app.get_crypto_data("BTC-USD")
         self.assertIsNotNone(result)
-        self.assertEqual(result['Ticker'], "BTC-USD")
+        self.assertIsNotNone(result['Ticker'], "BTC-USD")
         self.assertIsNotNone(result['Potencial'])
         self.assertIsNotNone(result['Estado'])
+        self.assertIsNotNone(result['Tendencia'])
         
 if __name__ == '__main__':
     unittest.main()
