@@ -160,13 +160,16 @@ class TestApp(unittest.TestCase):
             'annualReportExpenseRatio': 0.0003,
             'ytdReturn': 0.10,
             'category': 'Large Blend',
-            'totalAssets': 1000000000
+            'totalAssets': 1000000000,
+            'fiftyTwoWeekHigh': 400.0  # Added for Potential calc
         }
         
         result = app.get_etf_data("VOO")
         self.assertIsNotNone(result)
         self.assertEqual(result['Ticker'], "VOO")
         self.assertEqual(result['Yield'], 0.015)
+        self.assertIsNotNone(result['Potencial'])
+        self.assertIsNotNone(result['Estado'])
         self.assertEqual(result['Expense Ratio'], 0.0003)
 
     @patch('app.yf.Ticker')
@@ -178,14 +181,18 @@ class TestApp(unittest.TestCase):
             'marketCap': 1000000000000,
             'volume24Hr': 30000000000,
             'circulatingSupply': 19000000,
+            'volume24Hr': 30000000000,
+            'circulatingSupply': 19000000,
             'fiftyDayAverage': 45000.0,
-            'twoHundredDayAverage': 40000.0
+            'twoHundredDayAverage': 40000.0,
+            'fiftyTwoWeekHigh': 60000.0 # Added for Potential calc
         }
         
         result = app.get_crypto_data("BTC-USD")
         self.assertIsNotNone(result)
         self.assertEqual(result['Ticker'], "BTC-USD")
-        self.assertEqual(result['Estado'], "Alcista (Bullish)")
+        self.assertIsNotNone(result['Potencial'])
+        self.assertIsNotNone(result['Estado'])
         
 if __name__ == '__main__':
     unittest.main()

@@ -277,10 +277,29 @@ def get_etf_data(ticker_symbol):
             v = info.get(key)
             return v if v is not None else None
 
+        # Potential & Status based on 52-Week High
+        high_52w = safe_get('fiftyTwoWeekHigh')
+        potential = None
+        status = "N/A"
+        
+        if current_price and high_52w and high_52w > 0:
+            potential = (high_52w - current_price) / current_price
+            
+            if potential > 0.20:
+                status = "Oportunidad de Rebote"
+            elif potential > 0.05:
+                status = "Recuperando"
+            elif potential >= 0:
+                status = "Cerca de Máximos"
+            else:
+                status = "En Máximos"
+
         return {
             "Ticker": ticker_symbol,
             "Nombre": info.get('shortName', ticker_symbol),
             "Precio": current_price,
+            "Potencial": potential,
+            "Estado": status,
             "Yield": safe_get('yield'),
             "Expense Ratio": safe_get('annualReportExpenseRatio'),
             "Retorno YTD": safe_get('ytdReturn'),
@@ -305,28 +324,45 @@ def get_crypto_data(ticker_symbol):
         volume_24h = info.get('volume24Hr') or info.get('volume')
         circulating_supply = info.get('circulatingSupply')
         
-        ma50 = info.get('fiftyDayAverage')
-        ma200 = info.get('twoHundredDayAverage')
+        # Status logic
+        high_52w = info.get('fiftyTwoWeekHigh')
+        potential = None
+        status = "Neutro" # Default fallback
         
-        status = "N/A"
-        if ma50 and ma200:
-            if current_price > ma50 and current_price > ma200:
-                status = "Alcista (Bullish)"
-            elif current_price < ma50 and current_price < ma200:
-                status = "Bajista (Bearish)"
+        if current_price and high_52w and high_52w > 0:
+            potential = (high_52w - current_price) / current_price
+            
+            if potential > 0.20:
+                status = "Oportunidad de Rebote"
+            elif potential > 0.05:
+                status = "Recuperando"
+            elif potential >= 0:
+                status = "Cerca de Máximos"
             else:
-                status = "Neutral"
+                status = "En Máximos"
+        else:
+            # Fallback to MA logic if 52W high is missing
+            ma50 = info.get('fiftyDayAverage')
+            ma200 = info.get('twoHundredDayAverage')
+            if ma50 and ma200:
+                if current_price > ma50 and current_price > ma200:
+                    status = "Alcista (Bullish)"
+                elif current_price < ma50 and current_price < ma200:
+                    status = "Bajista (Bearish)"
+                else:
+                    status = "Neutro"
 
         return {
             "Ticker": ticker_symbol,
             "Nombre": info.get('shortName', ticker_symbol),
             "Precio": current_price,
-            "Market Cap": market_cap,
-            "Volumen 24h": volume_24h,
-            "Circulating Supply": circulating_supply,
-            "MA 50d": ma50,
-            "MA 200d": ma200,
-            "Estado": status
+            "Potencial": potential,
+            "Estado": status,
+            "Market Cap": info.get('marketCap'),
+            "Volumen 24h": info.get('volume24Hr'),
+            "Circulating Supply": info.get('circulatingSupply'),
+            "MA 50d": info.get('fiftyDayAverage'),
+            "MA 200d": info.get('twoHundredDayAverage')
         }
     except Exception as e:
         print(f"Error fetching Crypto data for {ticker_symbol}: {e}")
@@ -377,6 +413,14 @@ def render_etf_dataframe(dataframe):
             "Ticker": st.column_config.TextColumn("Símbolo", width="small"),
             "Nombre": st.column_config.TextColumn("Nombre", width="large"),
             "Precio": st.column_config.NumberColumn("Precio", format="$%.2f"),
+            "Potencial": st.column_config.ProgressColumn(
+                "Potencial Recupas.",
+                help="Potencial de recuperación hasta el máximo de 52 semanas",
+                format="%.2f%%",
+                min_value=-0.5,
+                max_value=0.5,
+            ),
+            "Estado": st.column_config.TextColumn("Estado", width="medium"),
             "Yield": st.column_config.NumberColumn("Yield", format="%.2f%%", help="Yield de dividendos (si aplica)"),
             "Expense Ratio": st.column_config.NumberColumn("Exp. Ratio", format="%.4f", help="Ratio de gastos anual"),
             "Retorno YTD": st.column_config.NumberColumn("Retorno YTD", format="%.2f%%"),
@@ -388,35 +432,38 @@ def render_etf_dataframe(dataframe):
     )
 
 def render_crypto_dataframe(dataframe):
-    column_config = {
-        "Ticker": st.column_config.TextColumn("Símbolo", width="small"),
-        "Nombre": st.column_config.TextColumn("Nombre", width="medium"),
-        "Precio": st.column_config.NumberColumn("Precio", format="$%.2f"),
-        "Market Cap": st.column_config.NumberColumn("Market Cap", format="$%.2e"),
-        "Volumen 24h": st.column_config.NumberColumn("Volumen 24h", format="$%.2e"),
-        "Circulating Supply": st.column_config.NumberColumn("Supply", format="%.2e"),
-        "MA 50d": st.column_config.NumberColumn("MA 50d", format="$%.2f"),
-        "MA 200d": st.column_config.NumberColumn("MA 200d", format="$%.2f"),
-        "Estado": st.column_config.TextColumn("Tendencia", width="small"),
-    }
-    
-    def style_trend(val):
-        if 'Alcista' in val:
-            color = '#28a745'
-        elif 'Bajista' in val:
-            color = '#dc3545'
-        else:
-            color = '#ffc107'
-        return f'color: {color}; font-weight: bold;'
+    # Style logic based on Status
+    def highlight_crypto_status(val):
+        color = ''
+        if 'Alcista' in str(val) or 'En Máximos' in str(val):
+            color = 'background-color: #2ca02c; color: white'
+        elif 'Bajista' in str(val):
+             color = 'background-color: #d62728; color: white'
+        elif 'Oportunidad' in str(val):
+             color = 'background-color: #1f77b4; color: white'
+        return color
 
-    styled_df = dataframe.style.map(style_trend, subset=['Estado'])
-    
     st.dataframe(
-        styled_df,
-        column_config=column_config,
+        dataframe.style.map(highlight_crypto_status, subset=['Estado']),
+        column_config={
+            "Ticker": st.column_config.TextColumn("Símbolo", width="small"),
+            "Nombre": st.column_config.TextColumn("Nombre", width="medium"),
+            "Precio": st.column_config.NumberColumn("Precio", format="$%.2f"),
+            "Potencial": st.column_config.ProgressColumn(
+                "Potencial 52W",
+                help="Distancia al máximo de 52 semanas",
+                format="%.2f%%",
+                min_value=-0.5,
+                max_value=1.5,
+            ),
+            "Estado": st.column_config.TextColumn("Estado"),
+            "Market Cap": st.column_config.NumberColumn("Market Cap", format="$%.2e"),
+            "Volumen 24h": st.column_config.NumberColumn("Volumen 24h", format="$%.2e"),
+            "MA 50d": st.column_config.NumberColumn("MA 50d", format="$%.2f"),
+            "MA 200d": st.column_config.NumberColumn("MA 200d", format="$%.2f"),
+        },
         use_container_width=True,
-        hide_index=True,
-        height=600
+        hide_index=True
     )
 
 # --- UI Principal ---
@@ -497,7 +544,7 @@ def main():
                                     st.rerun()
                                 else:
                                     st.error(f"Ticker inválido o sin datos: {t_man}")
-                            except:
+                            except Exception:
                                 st.error("Error al validar.")
 
         # Gestión de Tickers (Eliminar)
@@ -569,7 +616,7 @@ def main():
                             st.rerun()
                         else:
                             st.error("No se encontraron datos.")
-                    except:
+                    except Exception:
                         st.error("Ticker inválido.")
 
         # Manual Add
@@ -592,7 +639,7 @@ def main():
                                     st.rerun()
                                 else:
                                     st.error("No se encontraron datos.")
-                            except:
+                            except Exception:
                                 st.error("Error al validar.")
 
         # Remove ETFs
@@ -651,7 +698,7 @@ def main():
                             st.rerun()
                         else:
                             st.error("No se encontraron datos.")
-                    except:
+                    except Exception:
                         st.error("Ticker inválido (asegúrate de usar XXX-USD).")
 
         # Manual Add
@@ -673,7 +720,7 @@ def main():
                                     st.rerun()
                                 else:
                                     st.error("No se encontraron datos.")
-                            except:
+                            except Exception:
                                 st.error("Error al validar.")
 
         # Remove Crypto
