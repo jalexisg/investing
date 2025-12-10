@@ -129,6 +129,63 @@ class TestApp(unittest.TestCase):
         self.assertEqual(result['Ticker'], "TEST")
         self.assertEqual(result['Precio Actual'], 150.0)
         self.assertIsNotNone(result['Valor Justo'])
+
+    def test_load_tickers_migration(self):
+        # Test 1: File stores a list (legacy)
+        with patch("builtins.open", unittest.mock.mock_open(read_data='["AAPL", "TSLA"]')):
+            with patch("os.path.exists", return_value=True):
+                tickers = app.load_tickers()
+                self.assertIsInstance(tickers, dict)
+                self.assertEqual(tickers["stocks"], ["AAPL", "TSLA"])
+                self.assertEqual(tickers["etfs"], [])
+                self.assertEqual(tickers["crypto"], [])
+
+        # Test 2: File stores a dict (new format)
+        mock_json = '{"stocks": ["MSFT"], "etfs": ["VOO"], "crypto": ["BTC-USD"]}'
+        with patch("builtins.open", unittest.mock.mock_open(read_data=mock_json)):
+            with patch("os.path.exists", return_value=True):
+                tickers = app.load_tickers()
+                self.assertIsInstance(tickers, dict)
+                self.assertEqual(tickers["stocks"], ["MSFT"])
+                self.assertEqual(tickers["etfs"], ["VOO"])
+                self.assertEqual(tickers["crypto"], ["BTC-USD"])
+
+    @patch('app.yf.Ticker')
+    def test_get_etf_data(self, mock_ticker):
+        mock_instance = mock_ticker.return_value
+        mock_instance.info = {
+            'currentPrice': 350.0,
+            'shortName': 'Vanguard S&P 500',
+            'yield': 0.015,
+            'annualReportExpenseRatio': 0.0003,
+            'ytdReturn': 0.10,
+            'category': 'Large Blend',
+            'totalAssets': 1000000000
+        }
+        
+        result = app.get_etf_data("VOO")
+        self.assertIsNotNone(result)
+        self.assertEqual(result['Ticker'], "VOO")
+        self.assertEqual(result['Yield'], 0.015)
+        self.assertEqual(result['Expense Ratio'], 0.0003)
+
+    @patch('app.yf.Ticker')
+    def test_get_crypto_data(self, mock_ticker):
+        mock_instance = mock_ticker.return_value
+        mock_instance.info = {
+            'currentPrice': 50000.0,
+            'shortName': 'Bitcoin',
+            'marketCap': 1000000000000,
+            'volume24Hr': 30000000000,
+            'circulatingSupply': 19000000,
+            'fiftyDayAverage': 45000.0,
+            'twoHundredDayAverage': 40000.0
+        }
+        
+        result = app.get_crypto_data("BTC-USD")
+        self.assertIsNotNone(result)
+        self.assertEqual(result['Ticker'], "BTC-USD")
+        self.assertEqual(result['Estado'], "Alcista (Bullish)")
         
 if __name__ == '__main__':
     unittest.main()

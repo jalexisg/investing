@@ -97,3 +97,50 @@ def get_ticker_from_string(s):
         return s.split("(")[-1].replace(")", "").strip()
     except:
         return s
+
+COMMON_ETFS = [
+    "SPDR S&P 500 ETF Trust (SPY)",
+    "Vanguard S&P 500 ETF (VOO)",
+    "Vanguard S&P 500 UCITS ETF (VUAG.L)",
+    "Invesco QQQ Trust (QQQ)",
+    "Vanguard Total Stock Market (VTI)",
+    "iShares Core S&P 500 ETF (IVV)",
+    "Vanguard FTSE Developed Markets (VEA)",
+    "Vanguard Value ETF (VTV)",
+    "Vanguard Growth ETF (VUG)",
+    "iShares Core MSCI EAFE ETF (IEFA)",
+    "Vanguard Total Bond Market (BND)",
+    "SPDR Gold Shares (GLD)",
+    "iShares Russell 2000 ETF (IWM)",
+    "Vanguard Real Estate (VNQ)",
+    "Schwab US Dividend Equity (SCHD)",
+    "JPMorgan Equity Premium Income (JEPI)",
+    "ARK Innovation ETF (ARKK)",
+    "VanEck Semiconductor ETF (SMH)",
+    "Energy Select Sector SPDR (XLE)",
+    "Financial Select Sector SPDR (XLF)",
+    "Technology Select Sector SPDR (XLK)"
+]
+
+COMMON_CRYPTO = [
+    "Bitcoin (BTC-USD)",
+    "Ethereum (ETH-USD)",
+    "Solana (SOL-USD)",
+    "Binance Coin (BNB-USD)",
+    "XRP (XRP-USD)",
+    "Cardano (ADA-USD)",
+    "Avalanche (AVAX-USD)",
+    "Dogecoin (DOGE-USD)",
+    "Polkadot (DOT-USD)",
+    "Tron (TRX-USD)",
+    "Chainlink (LINK-USD)",
+    "Polygon (MATIC-USD)",
+    "Shiba Inu (SHIB-USD)",
+    "Litecoin (LTC-USD)",
+    "Bitcoin Cash (BCH-USD)",
+    "Stellar (XLM-USD)",
+    "Monero (XMR-USD)",
+    "Cosmos (ATOM-USD)",
+    "Uniswap (UNI-USD)",
+    "Near Protocol (NEAR-USD)"
+]
