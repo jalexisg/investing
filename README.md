@@ -5,6 +5,10 @@ Una aplicación web profesional de análisis financiero construida con **Python*
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.28%2B-red)
 ![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
+![Agents](https://img.shields.io/badge/AGENTS.md-Implemented-purple)
+
+> **For AI Agents**: Please refer to [AGENTS.md](AGENTS.md) for context and instructions.
+
 
 ## 🚀 Características
 
