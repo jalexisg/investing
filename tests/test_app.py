@@ -60,19 +60,22 @@ mock_st.column_config.ProgressColumn = MagicMock()
 
 sys.modules["streamlit"] = mock_st
 
-# --- Import app ---
+# --- Import modules ---
 import app
+import ui_helpers
+import valuation
+import data_provider
 
 class TestApp(unittest.TestCase):
 
     def test_format_large_number(self):
-        self.assertEqual(app.format_large_number(1_500_000_000_000), "1.5 T")
-        self.assertEqual(app.format_large_number(2_500_000_000), "2.5 B")
-        self.assertEqual(app.format_large_number(3_500_000), "3.5 M")
-        self.assertEqual(app.format_large_number(100), "100.00")
-        self.assertEqual(app.format_large_number(None), "-")
+        self.assertEqual(ui_helpers.format_large_number(1_500_000_000_000), "1.5 T")
+        self.assertEqual(ui_helpers.format_large_number(2_500_000_000), "2.5 B")
+        self.assertEqual(ui_helpers.format_large_number(3_500_000), "3.5 M")
+        self.assertEqual(ui_helpers.format_large_number(100), "100.00")
+        self.assertEqual(ui_helpers.format_large_number(None), "-")
 
-    @patch('app.yf.Ticker')
+    @patch('valuation.yf.Ticker')
     def test_get_historical_pe(self, mock_ticker):
         # Setup mock
         mock_instance = mock_ticker.return_value
@@ -92,12 +95,12 @@ class TestApp(unittest.TestCase):
         mock_instance.history.return_value = df_hist
         
         # Call function
-        avg_pe, method = app.get_historical_pe("TEST")
+        avg_pe, method = valuation.get_historical_pe("TEST")
         
         self.assertEqual(avg_pe, 20.0)
         self.assertEqual(method, "5y Historical Avg")
 
-    @patch('app.yf.Ticker')
+    @patch('data_provider.yf.Ticker')
     def test_get_stock_data_valid(self, mock_ticker):
         mock_instance = mock_ticker.return_value
         
@@ -123,7 +126,7 @@ class TestApp(unittest.TestCase):
         mock_instance.financials = pd.DataFrame(data, index=['Basic EPS'])
         mock_instance.history.return_value = pd.DataFrame({'Close': [100.0]}, index=[pd.Timestamp('2023-01-01')])
 
-        result = app.get_stock_data("TEST")
+        result = data_provider.get_stock_data("TEST")
         
         self.assertIsNotNone(result)
         self.assertEqual(result['Ticker'], "TEST")
@@ -150,7 +153,7 @@ class TestApp(unittest.TestCase):
                 self.assertEqual(tickers["etfs"], ["VOO"])
                 self.assertEqual(tickers["crypto"], ["BTC-USD"])
 
-    @patch('app.yf.Ticker')
+    @patch('data_provider.yf.Ticker')
     def test_get_etf_data(self, mock_ticker):
         mock_instance = mock_ticker.return_value
         mock_instance.info = {
@@ -164,7 +167,7 @@ class TestApp(unittest.TestCase):
             'fiftyTwoWeekHigh': 400.0  # Added for Potential calc
         }
         
-        result = app.get_etf_data("VOO")
+        result = data_provider.get_etf_data("VOO")
         self.assertIsNotNone(result)
         self.assertEqual(result['Ticker'], "VOO")
         self.assertEqual(result['Yield'], 0.015)
@@ -172,7 +175,7 @@ class TestApp(unittest.TestCase):
         self.assertIsNotNone(result['Estado'])
         self.assertEqual(result['Expense Ratio'], 0.0003)
 
-    @patch('app.yf.Ticker')
+    @patch('data_provider.yf.Ticker')
     def test_get_crypto_data(self, mock_ticker):
         mock_instance = mock_ticker.return_value
         mock_instance.info = {
@@ -188,7 +191,7 @@ class TestApp(unittest.TestCase):
             'fiftyTwoWeekHigh': 60000.0 # Added for Potential calc
         }
         
-        result = app.get_crypto_data("BTC-USD")
+        result = data_provider.get_crypto_data("BTC-USD")
         self.assertIsNotNone(result)
         self.assertIsNotNone(result['Ticker'], "BTC-USD")
         self.assertIsNotNone(result['Potencial'])
@@ -222,9 +225,9 @@ class TestApp(unittest.TestCase):
 
         # Call render functions (should not raise error)
         try:
-            app.render_dataframe(df_stocks)
-            app.render_etf_dataframe(df_etfs)
-            app.render_crypto_dataframe(df_crypto)
+            ui_helpers.render_dataframe(df_stocks)
+            ui_helpers.render_etf_dataframe(df_etfs)
+            ui_helpers.render_crypto_dataframe(df_crypto)
         except Exception as e:
             self.fail(f"Render functions raised exception: {e}")
 

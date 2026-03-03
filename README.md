@@ -2,7 +2,7 @@
 
 Una aplicación web profesional de análisis financiero construida con **Python** y **Streamlit**, diseñada para replicar y mejorar funcionalidades clave de **Investing.com**.
 
-![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.28%2B-red)
 ![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
 ![Agents](https://img.shields.io/badge/AGENTS.md-Implemented-purple)
