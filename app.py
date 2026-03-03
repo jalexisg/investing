@@ -154,13 +154,19 @@ def main():
         st.markdown("### 💎 Oportunidades (Value Investing)")
         if st.session_state.tickers["stocks"]:
             data = fetch_concurrently(st.session_state.tickers["stocks"], get_stock_data)
-            df = pd.DataFrame(data)
-            undervalued = df[df['Estado'] == 'Infravalorada']
-            if not undervalued.empty:
-                render_dataframe(undervalued)
-                st.balloons()
+            if data:
+                df = pd.DataFrame(data)
+                if 'Estado' in df.columns:
+                    undervalued = df[df['Estado'] == 'Infravalorada']
+                    if not undervalued.empty:
+                        render_dataframe(undervalued)
+                        st.balloons()
+                    else:
+                        st.info("No hay acciones infravaloradas en tu lista actual.")
+                else:
+                    st.warning("No se pudo determinar el estado de las acciones.")
             else:
-                st.info("No hay acciones infravaloradas en tu lista actual.")
+                st.info("No hay datos disponibles para analizar.")
         
         st.markdown("---")
         st.markdown("### 📊 Comparativa de Rendimiento (Sparklines Próximamente)")

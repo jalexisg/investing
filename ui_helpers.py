@@ -4,14 +4,16 @@ def inject_premium_css():
     """Injects high-end financial dashboard styling and hides default elements."""
     st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
         
         :root {
-            --bg-primary: #09090b;
+            --bg-primary: #020617;
             --bg-secondary: #0f172a;
-            --bg-glass: rgba(30, 41, 59, 0.7);
-            --border-color: #334155;
+            --bg-glass: rgba(15, 23, 42, 0.6);
+            --bg-glass-hover: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(51, 65, 85, 0.5);
             --accent-blue: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.15);
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --uptrend: #22c55e;
@@ -31,103 +33,217 @@ def inject_premium_css():
         .stDeployButton {display:none;}
         [data-testid="stHeader"] {background: rgba(0,0,0,0); border: none;}
 
-        /* Card Styling with Glassmorphism */
+        /* Sidebar Styling - Premium Redesign */
+        [data-testid="stSidebar"] {
+            background-color: #020617;
+            border-right: 1px solid var(--border-color);
+            padding-top: 2rem;
+        }
+
+        [data-testid="stSidebar"] section {
+            background-color: transparent !important;
+        }
+
+        /* Force Sidebar Text Visibility & Padding */
+        [data-testid="stSidebarNav"] label p,
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+        [data-testid="stSidebar"] section[data-testid="stSidebarNav"] p,
+        [data-testid="stSidebar"] .stMarkdown p,
+        [data-testid="stSidebar"] .stMarkdown span,
+        [data-testid="stSidebar"] label,
+        [data-testid="stSidebar"] .stCaption,
+        [data-testid="stSidebar"] [data-testid="stWidgetLabel"] p {
+            color: #ffffff !important;
+            font-size: 0.95rem !important;
+            font-weight: 500 !important;
+        }
+
+        /* Sidebar Nav Item Spacing & Hover */
+        [data-testid="stSidebarNav"] ul {
+            padding-top: 1rem !important;
+        }
+
+        [data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] > label {
+            padding: 10px 16px !important;
+            border-radius: 12px !important;
+            margin-bottom: 6px !important;
+            transition: all 0.2s ease !important;
+            border: 1px solid transparent !important;
+        }
+
+        [data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] > label:hover {
+            background-color: var(--bg-glass-hover) !important;
+            border-color: var(--border-color) !important;
+            transform: translateX(4px);
+        }
+
+        [data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] [data-testid="stMarkdownContainer"] p {
+            font-weight: 600 !important;
+            letter-spacing: 0.02em;
+        }
+
+        [data-testid="stSidebar"] hr {
+            margin: 1.5rem 0 !important;
+            border-top: 1px solid var(--border-color) !important;
+            opacity: 0.3;
+        }
+
+        /* Card Styling with Enhanced Glassmorphism */
         .metric-card {
             background: var(--bg-glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border-color);
-            padding: 1.5rem;
-            border-radius: 16px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 1.75rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
         }
         .metric-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent-blue);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            transform: translateY(-6px);
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 10px 40px -10px var(--accent-glow);
+            background: var(--bg-glass-hover);
+        }
+        .metric-card:hover::before {
+            opacity: 1;
         }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
         }
         ::-webkit-scrollbar-track {
             background: var(--bg-primary);
         }
         ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
+            background: #334155;
+            border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
+            background: var(--accent-blue);
         }
 
-        /* Sidebar Styling */
-        [data-testid="stSidebar"] {
-            background-color: #020617;
-            border-right: 1px solid var(--border-color);
-        }
-        
-        /* Ticker Tape Animation */
+        /* Ticker Tape Animation - Refined */
         .ticker-wrap {
             width: 100%;
             overflow: hidden;
             background: #020617;
-            border-bottom: 2px solid #0ea5e9;
-            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0;
             white-space: nowrap;
             position: sticky;
             top: 0;
             z-index: 999;
+            height: 32px;
+            display: flex;
+            align-items: center;
         }
         .ticker {
             display: inline-block;
-            animation: ticker 40s linear infinite;
+            animation: ticker 60s linear infinite;
         }
         .ticker-item {
             display: inline-block;
-            padding: 0 40px;
-            font-size: 0.95rem;
+            padding: 0 30px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
             font-weight: 500;
+            letter-spacing: -0.01em;
         }
-        .price-up { color: var(--uptrend); }
-        .price-down { color: var(--downtrend); }
+        .price-up { color: var(--uptrend) !important; }
+        .price-down { color: var(--downtrend) !important; }
 
         @keyframes ticker {
             0% { transform: translateX(100%); }
             100% { transform: translateX(-100%); }
         }
 
-        /* Tabs and Dataframes */
+        /* Tabs Refinement */
         button[data-baseweb="tab"] {
             background-color: transparent !important;
             border: none !important;
             color: var(--text-secondary) !important;
             font-weight: 600 !important;
+            font-size: 1rem !important;
+            padding-bottom: 8px !important;
         }
         button[data-baseweb="tab"][aria-selected="true"] {
             color: var(--accent-blue) !important;
             border-bottom: 2px solid var(--accent-blue) !important;
         }
+
+        /* Layout Gap Reduction - Aggressive */
+        [data-testid="stVerticalBlock"] {
+            gap: 0.25rem !important;
+        }
+        .stMain {
+            padding-top: 0.5rem !important;
+        }
+        [data-testid="stHeader"] {
+            display: none;
+        }
+        div.block-container {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+
+        /* Fix Button Contrast (White text on dark background) */
+        button[kind="secondary"], button[kind="primary"] {
+            background-color: #1e293b !important;
+            color: #ffffff !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 8px !important;
+            transition: all 0.2s ease !important;
+        }
+        button[kind="secondary"]:hover, button[kind="primary"]:hover {
+            background-color: var(--accent-blue) !important;
+            border-color: var(--accent-blue) !important;
+            color: #000000 !important;
+        }
+
+        /* Sidebar Spacing Refinement */
+        [data-testid="stSidebarNav"] ul {
+            padding-top: 0.5rem !important;
+        }
+        [data-testid="stSidebar"] hr {
+            margin: 1rem 0 !important;
+        }
+
     </style>
     """, unsafe_allow_html=True)
 
 def render_custom_header():
-    """Renders a professional top header to replace the hidden Streamlit bar."""
+    """Renders a professional top header with premium aesthetic."""
     st.markdown("""
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0 20px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 30px;">
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <div style="background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px;">🛡️</div>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0 16px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; position: relative;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px -4px rgba(14, 165, 233, 0.5); font-size: 20px;">🛡️</div>
             <div>
-                <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: var(--text-primary);">Terminal de Inversión Pro</h1>
-                <p style="margin: 0; font-size: 13px; color: var(--text-secondary);">Análisis de Mercado en Tiempo Real</p>
+                <h1 style="margin: 0; font-size: 22px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.1;">INVESTING PRO <span style="color: var(--accent-blue); font-weight: 400; font-size: 14px; margin-left: 4px; vertical-align: middle;">TERMINAL</span></h1>
+                <p style="margin: 0; font-size: 12px; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;">Intelligence & Asset Tracking</p>
             </div>
         </div>
-        <div style="display: flex; gap: 20px; align-items: center;">
-            <span style="font-size: 13px; color: #10b981;">● MERCADOS ABIERTOS</span>
-            <div style="padding: 6px 14px; background: #1e293b; border-radius: 8px; font-size: 12px; border: 1px solid var(--border-color);">CUENTA PREMIUM</div>
+        <div style="display: flex; gap: 24px; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 12px #10b981;"></span>
+                <span style="font-size: 12px; color: #10b981; font-weight: 700; letter-spacing: 0.05em;">LIVE MARKETS</span>
+            </div>
+            <div style="padding: 8px 16px; background: linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%); border-radius: 10px; font-size: 11px; font-weight: 700; border: 1px solid var(--border-color); color: var(--text-primary); letter-spacing: 0.05em;">PREMIUM ACCESS</div>
         </div>
     </div>
     """, unsafe_allow_html=True)

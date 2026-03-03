@@ -21,8 +21,8 @@ def get_market_summary():
     for symbol, name in major_tickers.items():
         try:
             ticker = yf.Ticker(symbol)
-            # Use history for last 2 days to get change
-            hist = ticker.history(period="2d")
+            # Use history for last 5 days to be safe across weekends
+            hist = ticker.history(period="5d")
             if len(hist) >= 2:
                 prev_close = hist['Close'].iloc[-2]
                 curr_price = hist['Close'].iloc[-1]
@@ -33,6 +33,14 @@ def get_market_summary():
                     "price": round(curr_price, 2),
                     "change": round(change, 2),
                     "change_pct": round(change_pct, 2)
+                })
+            elif len(hist) == 1:
+                curr_price = hist['Close'].iloc[-1]
+                data.append({
+                    "symbol": name,
+                    "price": round(curr_price, 2),
+                    "change": 0,
+                    "change_pct": 0
                 })
         except Exception as e:
             print(f"Error fetching summary for {symbol}: {e}")
