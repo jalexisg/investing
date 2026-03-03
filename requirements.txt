@@ -1,5 +1,9 @@
+ecocal==1.2.1
+numpy
+pandas
 streamlit
 yfinance
+plotly
 pandas
 numpy
 ecocal

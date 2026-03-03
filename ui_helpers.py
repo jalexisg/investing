@@ -1,50 +1,86 @@
 import streamlit as st
 
 def inject_premium_css():
-    """Injects high-end financial dashboard styling."""
+    """Injects high-end financial dashboard styling and hides default elements."""
     st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
         
         :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #171717;
-            --border-color: #262626;
-            --accent-blue: #3b82f6;
-            --text-primary: #ffffff;
+            --bg-primary: #09090b;
+            --bg-secondary: #0f172a;
+            --bg-glass: rgba(30, 41, 59, 0.7);
+            --border-color: #334155;
+            --accent-blue: #38bdf8;
+            --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
-            --uptrend: #10b981;
+            --uptrend: #22c55e;
             --downtrend: #ef4444;
         }
 
         .stApp {
             background-color: var(--bg-primary);
             color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
+            font-family: 'Outfit', sans-serif;
         }
 
-        /* Card Styling */
+        /* Hide Streamlit Default UI elements */
+        #MainMenu {visibility: hidden;}
+        header {visibility: hidden;}
+        footer {visibility: hidden;}
+        .stDeployButton {display:none;}
+        [data-testid="stHeader"] {background: rgba(0,0,0,0); border: none;}
+
+        /* Card Styling with Glassmorphism */
         .metric-card {
-            background-color: var(--bg-secondary);
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
             padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: transform 0.2s ease-in-out;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .metric-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-4px);
             border-color: var(--accent-blue);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
         }
 
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Sidebar Styling */
+        [data-testid="stSidebar"] {
+            background-color: #020617;
+            border-right: 1px solid var(--border-color);
+        }
+        
         /* Ticker Tape Animation */
         .ticker-wrap {
             width: 100%;
             overflow: hidden;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-color);
-            padding: 8px 0;
+            background: #020617;
+            border-bottom: 2px solid #0ea5e9;
+            padding: 10px 0;
             white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 999;
         }
         .ticker {
             display: inline-block;
@@ -52,9 +88,9 @@ def inject_premium_css():
         }
         .ticker-item {
             display: inline-block;
-            padding: 0 30px;
-            font-size: 0.9rem;
-            font-weight: 600;
+            padding: 0 40px;
+            font-size: 0.95rem;
+            font-weight: 500;
         }
         .price-up { color: var(--uptrend); }
         .price-down { color: var(--downtrend); }
@@ -66,15 +102,34 @@ def inject_premium_css():
 
         /* Tabs and Dataframes */
         button[data-baseweb="tab"] {
-            font-size: 1rem !important;
-            padding: 12px 24px !important;
+            background-color: transparent !important;
+            border: none !important;
+            color: var(--text-secondary) !important;
+            font-weight: 600 !important;
         }
-        .stDataFrame {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            overflow: hidden;
+        button[data-baseweb="tab"][aria-selected="true"] {
+            color: var(--accent-blue) !important;
+            border-bottom: 2px solid var(--accent-blue) !important;
         }
     </style>
+    """, unsafe_allow_html=True)
+
+def render_custom_header():
+    """Renders a professional top header to replace the hidden Streamlit bar."""
+    st.markdown("""
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0 20px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 30px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px;">🛡️</div>
+            <div>
+                <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: var(--text-primary);">Terminal de Inversión Pro</h1>
+                <p style="margin: 0; font-size: 13px; color: var(--text-secondary);">Análisis de Mercado en Tiempo Real</p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <span style="font-size: 13px; color: #10b981;">● MERCADOS ABIERTOS</span>
+            <div style="padding: 6px 14px; background: #1e293b; border-radius: 8px; font-size: 12px; border: 1px solid var(--border-color);">CUENTA PREMIUM</div>
+        </div>
+    </div>
     """, unsafe_allow_html=True)
 
 def render_ticker_tape(data):

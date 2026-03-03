@@ -7,9 +7,11 @@ import os
 from data_provider import get_stock_data, get_etf_data, get_crypto_data, fetch_concurrently
 from ui_helpers import (
     render_dataframe, render_etf_dataframe, render_crypto_dataframe, 
-    inject_premium_css, render_ticker_tape, render_metric_card
+    inject_premium_css, render_ticker_tape, render_metric_card,
+    render_custom_header
 )
 from economics_provider import get_market_summary, get_economic_calendar
+from tools_helper import render_compound_interest_tool, render_mortgage_tool
 import consts
 
 # --- Page Configuration ---
@@ -62,6 +64,7 @@ def main():
     # --- Top Bar Segment (Ticker Tape) ---
     market_summary = get_market_summary()
     render_ticker_tape(market_summary)
+    render_custom_header()
 
     # --- Sidebar Navigation ---
     with st.sidebar:
@@ -181,10 +184,21 @@ def main():
         )
 
     elif nav_selection == "Herramientas":
-        st.title("Herramientas y Configuración")
-        st.markdown("#### Gestión de Activos")
-        # Add manual entry etc here if needed
-        st.info("Sección en desarrollo.")
+        st.title("🛡️ Herramientas Financieras")
+        
+        tool_type = st.segmented_control(
+            "Seleccionar Herramienta",
+            ["Calculadora Interés Compuesto", "Calculadora Hipoteca"],
+            default="Calculadora Interés Compuesto",
+            label_visibility="collapsed"
+        )
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        if tool_type == "Calculadora Interés Compuesto":
+            render_compound_interest_tool()
+        elif tool_type == "Calculadora Hipoteca":
+            render_mortgage_tool()
 
 if __name__ == "__main__":
     main()
